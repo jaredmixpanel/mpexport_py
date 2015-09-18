@@ -1,6 +1,7 @@
 from Tkinter import *
 from ttk import Progressbar
 from tkMessageBox import askyesno
+from tkFileDialog import askdirectory
 import sys
 import os
 import tempfile
@@ -188,7 +189,7 @@ class Mixpanel(object):
                         except KeyError:
                             row.append("")
                     writer.writerow(row)
-                print 'CSV saved to ' + w.name[9:]
+                print 'CSV saved to ' + w.name
                 w.close()
 
     def event_json_to_csv(self, outfileName, data):
@@ -207,7 +208,7 @@ class Mixpanel(object):
         event_raw.pop()
 
         event_list = []
-        jsonfile = '.'.join(outfileName.split('.')[:-1]) + '.json'
+        jsonfile = outfileName[:-4] + '.json'
         with open(jsonfile,'w') as j:
             j.write('[')
             i = 0
@@ -221,7 +222,7 @@ class Mixpanel(object):
                     j.write(']')
                 event_json = json.loads(event)
                 event_list.append(event_json)
-            print 'JSON saved to ' + j.name[9:]
+            print 'JSON saved to ' + j.name
             j.close()
 
         subkeys = get_sub_keys(event_list)
@@ -256,7 +257,7 @@ class Mixpanel(object):
             #write the line
             writer.writerow(line)
 
-        print 'CSV saved to ' + f.name[9:]
+        print 'CSV saved to ' + f.name
         f.close()
 
     def update(self, userlist, uparams):
@@ -289,6 +290,7 @@ class Mixpanel(object):
             users = users[50:]
         pool.waitall()
         print "Done!"
+
 
 class StdRedirector(object):
     def __init__(self, widget):
@@ -441,6 +443,9 @@ class MPExportApp(object):
             print 'API Secret Required!'
             return
 
+        self.output_dir = askdirectory(title='Choose output directory', mustexist=True, parent=self.master)
+        print 'Output directory is ' + self.output_dir
+
         self.progress_bar.start()
         if self.export_type.get() == 'people':
             self.export_thread = threading.Thread(target=self.export_people)
@@ -481,7 +486,7 @@ class MPExportApp(object):
 
         print "Session id is %s \n" % parameters['session_id']
         print "Here are the # of people %d" % global_total
-        filename = "../../../people_export_"+str(int(time.time()))
+        filename = self.output_dir + "/people_export_"+str(int(time.time()))
         jsonfile = filename + ".json"
         csvfile = filename + ".csv"
         has_results = True
@@ -511,10 +516,8 @@ class MPExportApp(object):
                     else:
                         j.write(']')
 
-                print 'JSON saved to ' + j.name[9:]
+                print 'JSON saved to ' + j.name
                 j.close()
-
-                '''specify your output filename here'''
 
         mixpanel.people_json_to_csv(csvfile, temp.name)
         temp.close()
@@ -550,7 +553,7 @@ class MPExportApp(object):
 
         json_data = mixpanel.request(['export'], params)
         if json_data:
-            mixpanel.event_json_to_csv("../../../event_export_"+str(int(time.time()))+".csv", json_data)
+            mixpanel.event_json_to_csv(self.output_dir + "/event_export_"+str(int(time.time()))+".csv", json_data)
         else:
             print 'Export returned 0 events!'
 
@@ -562,6 +565,8 @@ class MPExportApp(object):
         if self.project_token_entry.get() == '':
             print 'Project Token Required!'
             return
+
+        self.output_dir = askdirectory(title='Choose backup directory', mustexist=True, parent=self.master)
 
         self.progress_bar.start()
         mixpanel = Mixpanel(
@@ -591,10 +596,10 @@ class MPExportApp(object):
             return
 
         print "Here are the # of people %d" % global_total
-        fname = "../../../backup-" + str(int(time.time())) + ".json"
+        fname = self.output_dir + "/backup-" + str(int(time.time())) + ".json"
         has_results = True
         total = 0
-        print "BACKUP FILE saved to " + fname[9:]
+        print "BACKUP FILE saved to " + fname
         f = open(fname, 'w')
 
         self.progress_bar.stop()
