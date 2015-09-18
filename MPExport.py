@@ -97,12 +97,11 @@ class Mixpanel(object):
         else:
             request_url = '/'.join([API_ENDPOINT, str(API_VERSION)] + methods) + '/?'
 
+        print request_url
         request_url = request_url + self.unicode_urlencode(params)
 
         request = urllib.urlopen(request_url)
         data = request.read()
-
-        print request_url
 
         return data
 
