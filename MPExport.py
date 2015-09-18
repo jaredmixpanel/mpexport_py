@@ -188,7 +188,7 @@ class Mixpanel(object):
                         except KeyError:
                             row.append("")
                     writer.writerow(row)
-                print 'CSV saved to ' + w.name
+                print 'CSV saved to ' + w.name[9:]
                 w.close()
 
     def event_json_to_csv(self, outfileName, data):
@@ -221,7 +221,7 @@ class Mixpanel(object):
                     j.write(']')
                 event_json = json.loads(event)
                 event_list.append(event_json)
-            print 'JSON saved to ' + j.name
+            print 'JSON saved to ' + j.name[9:]
             j.close()
 
         subkeys = get_sub_keys(event_list)
@@ -256,7 +256,7 @@ class Mixpanel(object):
             #write the line
             writer.writerow(line)
 
-        print 'CSV saved to ' + f.name
+        print 'CSV saved to ' + f.name[9:]
         f.close()
 
     def update(self, userlist, uparams):
@@ -481,8 +481,7 @@ class MPExportApp(object):
 
         print "Session id is %s \n" % parameters['session_id']
         print "Here are the # of people %d" % global_total
-        filename = "people_export_"+str(int(time.time()))
-        swapfile = 'swapfile.tmp'
+        filename = "../../../people_export_"+str(int(time.time()))
         jsonfile = filename + ".json"
         csvfile = filename + ".csv"
         has_results = True
@@ -512,7 +511,7 @@ class MPExportApp(object):
                     else:
                         j.write(']')
 
-                print 'JSON saved to ' + j.name
+                print 'JSON saved to ' + j.name[9:]
                 j.close()
 
                 '''specify your output filename here'''
@@ -551,7 +550,7 @@ class MPExportApp(object):
 
         json_data = mixpanel.request(['export'], params)
         if json_data:
-            mixpanel.event_json_to_csv("event_export_"+str(int(time.time()))+".csv", json_data)
+            mixpanel.event_json_to_csv("../../../event_export_"+str(int(time.time()))+".csv", json_data)
         else:
             print 'Export returned 0 events!'
 
@@ -592,10 +591,10 @@ class MPExportApp(object):
             return
 
         print "Here are the # of people %d" % global_total
-        fname = "backup-" + str(int(time.time())) + ".json"
+        fname = "../../../backup-" + str(int(time.time())) + ".json"
         has_results = True
         total = 0
-        print "BACKUP FILE saved to " + fname
+        print "BACKUP FILE saved to " + fname[9:]
         f = open(fname, 'w')
 
         self.progress_bar.stop()
