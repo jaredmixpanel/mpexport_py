@@ -469,6 +469,8 @@ class MPExportApp(object):
             result = '\nAPI ERROR! - ' + json.loads(response)['error'] + '\n'
             if result:
                 print result
+                self.progress_bar.stop()
+                self.progress_bar_value.set(0)
                 return
         except KeyError, e:
             pass
@@ -560,7 +562,13 @@ class MPExportApp(object):
 
     def delete_people(self):
 
-        if self.project_token_entry.get() == '':
+        if self.api_key_entry.get() == '':
+            print 'API Key Required!'
+            return
+        elif self.api_secret_entry.get() == '':
+            print 'API Secret Required!'
+            return
+        elif self.project_token_entry.get() == '':
             print 'Project Token Required!'
             return
 
@@ -580,6 +588,16 @@ class MPExportApp(object):
             parameters['where'] = self.where_entry.get()
 
         response = mixpanel.request(['engage'], parameters)
+
+        try:
+            result = '\nAPI ERROR! - ' + json.loads(response)['error'] + '\n'
+            if result:
+                print result
+                self.progress_bar.stop()
+                self.progress_bar_value.set(0)
+                return
+        except KeyError, e:
+            pass
 
         parameters.update({
                     'session_id': json.loads(response)['session_id'],
