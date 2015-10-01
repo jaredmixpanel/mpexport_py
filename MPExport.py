@@ -442,6 +442,8 @@ class MPExportApp(object):
             return
 
         self.output_dir = askdirectory(title='Choose output directory', mustexist=True, parent=self.master)
+        if not self.output_dir:
+            return
         print 'Output directory is ' + self.output_dir
 
         self.progress_bar.start()
@@ -462,7 +464,13 @@ class MPExportApp(object):
 
         '''Here is the place to define your selector to target only the users that you're after'''
         '''parameters = {'selector':'(properties["$email"] == "Albany") or (properties["$city"] == "Alexandria")'}'''
-        parameters = {'selector': self.where_entry.get()}
+        selector = self.where_entry.get()
+
+        parameters = {}
+
+        if selector:
+            parameters['selector'] = selector
+
         response = mixpanel.request(['engage'], parameters)
 
         try:
@@ -551,9 +559,14 @@ class MPExportApp(object):
         if self.where_entry.get():
             params['where'] = self.where_entry.get()
 
-        json_data = mixpanel.request(['export'], params)
-        if json_data:
-            mixpanel.event_json_to_csv(self.output_dir + "/event_export_"+str(int(time.time()))+".csv", json_data)
+        raw_data = mixpanel.request(['export'], params)
+        if raw_data:
+            time_string = str(int(time.time()))
+            raw_filename = self.output_dir + "/raw_event_data_" + time_string + ".txt"
+            with open(raw_filename, 'w') as raw_file:
+                raw_file.write(raw_data)
+            print 'Raw data save to ' + raw_filename
+            mixpanel.event_json_to_csv(self.output_dir + "/event_export_"+time_string+".csv", raw_data)
         else:
             print 'Export returned 0 events!'
 
@@ -573,6 +586,8 @@ class MPExportApp(object):
             return
 
         self.output_dir = askdirectory(title='Choose backup directory', mustexist=True, parent=self.master)
+        if not self.output_dir:
+            return
 
         self.progress_bar.start()
         mixpanel = Mixpanel(
